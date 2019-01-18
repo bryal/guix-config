@@ -20,6 +20,7 @@
 		     syncthing
 		     sync
 		     xorg
+		     fonts
 		     stalonetray
 		     ;; lemonbar-sm
 		     )
@@ -130,7 +131,9 @@
 		   syncthing
 		   ;;
 		   ;; EXWM Window manager
+		   ;; GUI. EXWM Window manager
 		   emacs-exwm
+		   font-dejavu
 		   xinput
 		   xrandr
 		   xbacklight
