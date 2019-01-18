@@ -3,13 +3,12 @@
 ;; root partition is encrypted with LUKS.
 
 (use-modules (gnu)
-	     (gnu system nss)
 	     (guix packages)
 	     (guix git-download)
 	     (guix build-system trivial)
 	     ((guix licenses) #:prefix license:)
 	     (guix download))
-(use-service-modules networking ssh desktop)
+(use-service-modules networking ssh desktop xorg)
 (use-package-modules certs
 		     screen
 		     linux
@@ -77,6 +76,13 @@
      (description "Linux is a kernel.")
      (license license:gpl2)
      (home-page "http://kernel.org/"))))
+
+(define intel-backlight
+  "Section \"Device\"
+        Identifier  \"Intel Graphics\"
+        Driver      \"intel\"
+        Option      \"Backlight\"  \"intel_backlight\"
+EndSection")
 
 (operating-system
  (host-name "sleipnir")
@@ -149,14 +155,23 @@
 	    ;;
             %base-packages))
 
-  ;; Add GNOME and/or Xfce---we can choose at the log-in
-  ;; screen with F1.  Use the "desktop" services, which
-  ;; include the X11 log-in service, networking with
-  ;; NetworkManager, and more.
-  (services (cons* (service openssh-service-type
-                            (openssh-configuration
-                             (port-number 22)))
-                   %desktop-services))
+ ;; Add GNOME and/or Xfce---we can choose at the log-in
+ ;; screen with F1.  Use the "desktop" services, which
+ ;; include the X11 log-in service, networking with
+ ;; NetworkManager, and more.
+ (services (cons* (service openssh-service-type
+                           (openssh-configuration
+                            (port-number 22)))
+                  (modify-services %desktop-services
+                                   (slim-service-type
+                                    config =>
+                                    (slim-configuration
+                                     (inherit config)
+                                     (startx (xorg-start-command
+                                              #:configuration-file
+                                              (xorg-configuration-file
+                                               #:extra-config
+                                               (list intel-backlight)))))))))
 
  ;; Allow resolution of '.local' host names with mDNS.
  (name-service-switch %mdns-host-lookup-nss))
