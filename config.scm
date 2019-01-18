@@ -21,6 +21,7 @@
 		     sync
 		     xorg
 		     fonts
+		     gnuzilla
 		     stalonetray
 		     ;; lemonbar-sm
 		     )
@@ -130,7 +131,6 @@
 		   emacs
 		   syncthing
 		   ;;
-		   ;; EXWM Window manager
 		   ;; GUI. EXWM Window manager
 		   emacs-exwm
 		   font-dejavu
@@ -143,6 +143,9 @@
 		   ;; pasystray
 		   network-manager-applet
 		   qsyncthingtray
+		   ;;
+		   ;; Misc useful packages
+		   icecat
 		   ;;
                    %base-packages))
 
