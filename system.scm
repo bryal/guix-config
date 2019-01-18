@@ -78,10 +78,21 @@
      (home-page "http://kernel.org/"))))
 
 (define intel-backlight
-  "Section \"Device\"
+  "
+Section \"Device\"
         Identifier  \"Intel Graphics\"
         Driver      \"intel\"
         Option      \"Backlight\"  \"intel_backlight\"
+EndSection")
+
+(define touchpad
+  "
+Section \"InputClass\"
+        Identifier  \"Touchpad\"
+        Driver      \"libinput\"
+        MatchIsTouchpad \"on\"
+        Option \"Tapping\" \"on\"
+        Option \"ClickMethod\" \"clickfinger\"
 EndSection")
 
 (operating-system
@@ -171,7 +182,8 @@ EndSection")
                                               #:configuration-file
                                               (xorg-configuration-file
                                                #:extra-config
-                                               (list intel-backlight)))))))))
+                                               (list intel-backlight
+                                                     touchpad)))))))))
 
  ;; Allow resolution of '.local' host names with mDNS.
  (name-service-switch %mdns-host-lookup-nss))
