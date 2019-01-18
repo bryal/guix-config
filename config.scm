@@ -64,90 +64,90 @@
 (define-public linux-nonfree
   (let* ((version "4.18.5"))
     (package
-      (inherit linux-libre)
-      (name "linux-nonfree")
-      (version version)
-      (source (origin
-                (method url-fetch)
-                (uri (linux-nonfree-urls version))
-                (sha256
-                 (base32
-                  "1ga7ys6s5d9dk1ly9722sbik1y6kbc3w6nw9pw86zpzdh0v0l2gv"))))
-      (synopsis "Mainline Linux kernel, nonfree binary blobs included.")
-      (description "Linux is a kernel.")
-      (license license:gpl2)
-      (home-page "http://kernel.org/"))))
+     (inherit linux-libre)
+     (name "linux-nonfree")
+     (version version)
+     (source (origin
+              (method url-fetch)
+              (uri (linux-nonfree-urls version))
+              (sha256
+               (base32
+                "1ga7ys6s5d9dk1ly9722sbik1y6kbc3w6nw9pw86zpzdh0v0l2gv"))))
+     (synopsis "Mainline Linux kernel, nonfree binary blobs included.")
+     (description "Linux is a kernel.")
+     (license license:gpl2)
+     (home-page "http://kernel.org/"))))
 
 (operating-system
-  (host-name "sleipnir")
-  (timezone "Europe/Paris")
-  (locale "en_US.utf8")
+ (host-name "sleipnir")
+ (timezone "Europe/Paris")
+ (locale "en_US.utf8")
 
-  (kernel linux-nonfree)
-  (firmware (cons* linux-firmware-non-free
-		   %base-firmware))
+ (kernel linux-nonfree)
+ (firmware (cons* linux-firmware-non-free
+		  %base-firmware))
 
-  ;; Use the UEFI variant of GRUB with the EFI System
-  ;; Partition mounted on /boot/efi.
-  (bootloader (bootloader-configuration
-                (bootloader grub-efi-bootloader)
-                (target "/boot/efi")))
+ ;; Use the UEFI variant of GRUB with the EFI System
+ ;; Partition mounted on /boot/efi.
+ (bootloader (bootloader-configuration
+              (bootloader grub-efi-bootloader)
+              (target "/boot/efi")))
 
-  ;; Specify a mapped device for the encrypted root partition.
-  ;; The UUID is that returned by 'cryptsetup luksUUID'.
-  (mapped-devices
-   (list (mapped-device
-          (source (uuid "97e45a43-a827-4633-88ee-dc95bc5a9d6a"))
-          (target "my-root")
-          (type luks-device-mapping))))
+ ;; Specify a mapped device for the encrypted root partition.
+ ;; The UUID is that returned by 'cryptsetup luksUUID'.
+ (mapped-devices
+  (list (mapped-device
+         (source (uuid "97e45a43-a827-4633-88ee-dc95bc5a9d6a"))
+         (target "my-root")
+         (type luks-device-mapping))))
 
-  (file-systems (cons* (file-system (device "/dev/sda1")
-				    (mount-point "/boot/efi")
-				    (type "vfat"))
-		       (file-system (device (file-system-label "my-root"))
-				    (mount-point "/")
-				    (type "ext4")
-				    (dependencies mapped-devices))
-                       %base-file-systems))
+ (file-systems (cons* (file-system (device "/dev/sda1")
+				   (mount-point "/boot/efi")
+				   (type "vfat"))
+		      (file-system (device (file-system-label "my-root"))
+				   (mount-point "/")
+				   (type "ext4")
+				   (dependencies mapped-devices))
+                      %base-file-systems))
 
-  (users (cons (user-account
-                (name "jojo")
-                (comment "Me")
-                (group "users")
-                (supplementary-groups '("wheel"
-					"netdev"
-                                        "audio"
-					"video"))
-                (home-directory "/home/jojo"))
-               %base-user-accounts))
+ (users (cons (user-account
+               (name "jojo")
+               (comment "Me")
+               (group "users")
+               (supplementary-groups '("wheel"
+				       "netdev"
+                                       "audio"
+				       "video"))
+               (home-directory "/home/jojo"))
+              %base-user-accounts))
 
-  ;; This is where we specify system-wide packages.
-  (packages (cons* ;; System packages
-	           nss-certs		; HTTPS access
-		   ;;
-		   ;; Important general packages
-                   screen
-		   git
-		   emacs
-		   syncthing
-		   ;;
-		   ;; GUI. EXWM Window manager
-		   emacs-exwm
-		   font-dejavu
-		   xinput
-		   xrandr
-		   xbacklight
-		   setxkbmap
-		   stalonetray
-		   ;; lemonbar
-		   ;; pasystray
-		   network-manager-applet
-		   qsyncthingtray
-		   ;;
-		   ;; Misc useful packages
-		   icecat
-		   ;;
-                   %base-packages))
+ ;; This is where we specify system-wide packages.
+ (packages (cons* ;; System packages
+	    nss-certs		; HTTPS access
+	    ;;
+	    ;; Important general packages
+            screen
+	    git
+	    emacs
+	    syncthing
+	    ;;
+	    ;; GUI. EXWM Window manager
+	    emacs-exwm
+	    font-dejavu
+	    xinput
+	    xrandr
+	    xbacklight
+	    setxkbmap
+	    stalonetray
+	    ;; lemonbar
+	    ;; pasystray
+	    network-manager-applet
+	    qsyncthingtray
+	    ;;
+	    ;; Misc useful packages
+	    icecat
+	    ;;
+            %base-packages))
 
   ;; Add GNOME and/or Xfce---we can choose at the log-in
   ;; screen with F1.  Use the "desktop" services, which
@@ -158,5 +158,5 @@
                              (port-number 22)))
                    %desktop-services))
 
-  ;; Allow resolution of '.local' host names with mDNS.
-  (name-service-switch %mdns-host-lookup-nss))
+ ;; Allow resolution of '.local' host names with mDNS.
+ (name-service-switch %mdns-host-lookup-nss))
