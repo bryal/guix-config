@@ -155,6 +155,7 @@ EndSection")
 	    xrandr
 	    xbacklight
 	    setxkbmap
+            xset
 	    stalonetray
 	    ;; lemonbar
 	    ;; pasystray
