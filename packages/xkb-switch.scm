@@ -1,0 +1,23 @@
+(use-modules (gnu)
+             (guix packages)
+             (guix git-download)
+             (guix build-system cmake)
+             ((guix licenses) #:prefix license:))
+(use-package-modules xorg)
+
+(package (name "xkb-switch")
+         (version "994231143fe65a996291edc41473d86728671ddc")
+         (source (origin (method git-fetch)
+                         (uri (git-reference (url "https://github.com/ierton/xkb-switch")
+                                             (commit version)))
+                         (sha256 (base32 "0vl979h6ww47b68j3nx7gpn8ymk34xs5i7kvaz0fkg3fn2aajdf3"))))
+         (build-system cmake-build-system)
+         (arguments
+          '(#:phases (modify-phases %standard-phases
+                                    (delete 'check))))
+         (inputs `(("libxkbfile" ,libxkbfile)
+                   ("libx11" ,libx11)))
+         (home-page "https://github.com/ierton/xkb-switch")
+         (synopsis "Query and change the XKB layout state")
+         (description "xkb-switch is a C++ program that allows to query and change the XKB layout state. Originally ruby-based code written by J.Broomley.")
+         (license license:gpl3))
