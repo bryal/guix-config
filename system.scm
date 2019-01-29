@@ -8,7 +8,7 @@
 	     (guix build-system trivial)
 	     ((guix licenses) #:prefix license:)
 	     (guix download))
-(use-service-modules networking ssh desktop xorg)
+(use-service-modules shepherd networking ssh desktop xorg)
 (use-package-modules certs
                      bash
 		     screen
@@ -86,6 +86,22 @@ Section \"Device\"
         Driver      \"intel\"
         Option      \"Backlight\"  \"intel_backlight\"
 EndSection")
+
+(define (fancontrol-shepherd-service config)
+  "Return a <shepherd-service> for fancontrol"
+  (define fancontrol-command
+    `(list (string-append ,lm-sensors "/sbin/fancontrol")))
+  (list (shepherd-service (provision '(fancontrol-daemon))
+                          (documentation "Fancontrol daemon")
+                          (start `(make-forkexec-constructor ,fancontrol-command))
+                          (stop `(make-kill-destructor)))))
+
+(define fancontrol-service-type
+  (service-type (name 'fancontrol)
+                (description "Run the fancontrol daemon")
+                (extensions (list (service-extension shepherd-root-service-type
+                                                     fancontrol-shepherd-service)))
+                (default-value '())))
 
 (define touchpad
   "
@@ -168,6 +184,7 @@ EndSection")
 	    ;;
 	    ;; Misc useful packages
 	    icecat
+            lm-sensors
             python
 	    ;;
             %base-packages))
@@ -179,6 +196,7 @@ EndSection")
  (services (cons* (service openssh-service-type
                            (openssh-configuration
                             (port-number 22)))
+                  (service fancontrol-service-type '())
                   (extra-special-file "/usr/bin/sh" (file-append bash "/bin/sh"))
                   (extra-special-file "/bin/bash" (file-append bash "/bin/bash"))
                   (extra-special-file "/usr/bin/bash" (file-append bash "/bin/bash"))
