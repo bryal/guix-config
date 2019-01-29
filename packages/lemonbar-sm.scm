@@ -3,7 +3,7 @@
              (guix git-download)
              (guix build-system gnu)
              ((guix licenses) #:prefix license:))
-(use-package-modules xorg fontutils perl)
+(use-package-modules xorg fontutils perl acl)
 
 (package (name "lemonbar-sm")
          (version "ba126f832277b00c2f8c8e0850434542b8452d33")
@@ -28,7 +28,8 @@
                    ("libx11" ,libx11)
                    ("freetype" ,freetype)
                    ("fontconfig" ,fontconfig)
-                   ("perl" ,perl)))
+                   ("perl" ,perl)
+                   ("acl" ,acl)))
          (home-page "https://github.com/osense/bar")
          (synopsis "Lightweight status bar. Fork of lemonbar, with xft support and the ability so select monitor.")
          (description "*lemonbar* (formerly known as *bar*) is a lightweight bar entirely based on XCB. Provides full UTF-8 support, basic formatting, RandR and Xinerama support and EWMH compliance wihtout wasting your precious memory.")

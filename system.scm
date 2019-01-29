@@ -22,7 +22,6 @@
 		     fonts
 		     gnuzilla
 		     stalonetray
-		     ;; lemonbar-sm
 		     )
 
 (define (linux-nonfree-urls version)
@@ -157,7 +156,6 @@ EndSection")
 	    setxkbmap
             xset
 	    stalonetray
-	    ;; lemonbar
 	    ;; pasystray
 	    network-manager-applet
 	    qsyncthingtray
