@@ -10,6 +10,7 @@
 	     (guix download))
 (use-service-modules networking ssh desktop xorg)
 (use-package-modules certs
+                     bash
 		     screen
 		     linux
 		     version-control
@@ -22,7 +23,9 @@
 		     fonts
 		     gnuzilla
 		     stalonetray
-		     )
+                     gdb
+                     file
+                     python)
 
 (define (linux-nonfree-urls version)
   "Return a list of URLs for Linux-Nonfree VERSION."
@@ -146,6 +149,8 @@ EndSection")
 	    git
 	    emacs
 	    syncthing
+            gdb
+            file
 	    ;;
 	    ;; GUI. EXWM Window manager
 	    emacs-exwm
@@ -162,6 +167,7 @@ EndSection")
 	    ;;
 	    ;; Misc useful packages
 	    icecat
+            python
 	    ;;
             %base-packages))
 
@@ -172,6 +178,11 @@ EndSection")
  (services (cons* (service openssh-service-type
                            (openssh-configuration
                             (port-number 22)))
+                  (extra-special-file "/usr/bin/sh" (file-append bash "/bin/sh"))
+                  (extra-special-file "/bin/bash" (file-append bash "/bin/bash"))
+                  (extra-special-file "/usr/bin/bash" (file-append bash "/bin/bash"))
+                  (extra-special-file "/usr/bin/python3" (file-append python "/bin/python3"))
+                  (extra-special-file "/usr/bin/python" (file-append python "/bin/python3"))
                   (modify-services %desktop-services
                                    (slim-service-type
                                     config =>
