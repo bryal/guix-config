@@ -15,7 +15,7 @@
 		     linux
 		     version-control
 		     emacs
-		     emacs-xyz
+                     emacs-xyz
 		     gnome
 		     syncthing
 		     sync
@@ -164,6 +164,7 @@ EndSection")
 	    ;; pasystray
 	    network-manager-applet
 	    qsyncthingtray
+            adwaita-icon-theme
 	    ;;
 	    ;; Misc useful packages
 	    icecat
