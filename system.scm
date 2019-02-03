@@ -25,7 +25,8 @@
 		     stalonetray
                      gdb
                      file
-                     python)
+                     python
+		     xdisorg)
 
 (define (linux-nonfree-urls version)
   "Return a list of URLs for Linux-Nonfree VERSION."
@@ -176,6 +177,7 @@ EndSection")
 	    xbacklight
 	    setxkbmap
             xset
+	    xss-lock
 	    stalonetray
 	    ;; pasystray
 	    network-manager-applet
