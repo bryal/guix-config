@@ -1,56 +1,212 @@
-;; This is an operating system configuration generated
-;; by the graphical installer.
+(use-modules (gnu)
+	     (guix packages)
+	     (guix git-download)
+	     (guix build-system trivial)
+	     ((guix licenses) #:prefix license:)
+	     (guix download)
+             (srfi srfi-1))
+(use-service-modules shepherd networking ssh desktop xorg)
+(use-package-modules certs
+                     bash
+		     screen
+		     linux
+		     version-control
+		     emacs
+                     emacs-xyz
+		     gnome
+		     syncthing
+		     sync
+		     xorg
+		     fonts
+		     gnuzilla
+		     stalonetray
+                     gdb
+                     file
+                     python
+                     python-xyz
+		     xdisorg
+                     freedesktop)
 
-(use-modules (gnu))
-(use-service-modules desktop networking ssh xorg)
-(use-package-modules version-control file gnuzilla)
+(define (linux-nonfree-urls version)
+  "Return a list of URLs for Linux-Nonfree VERSION."
+  (list (string-append
+         "https://www.kernel.org/pub/linux/kernel/v5.x/"
+         "linux-" version ".tar.xz")))
+
+(define-public linux-firmware-non-free
+  (package
+    (name "linux-firmware-non-free")
+    (version "92e17d0dd2437140fab044ae62baf69b35d7d1fa")
+    (source (origin
+              (method git-fetch)
+              (uri (git-reference
+                    (url "git://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git")
+                    (commit version)))
+              (sha256
+               (base32
+                "1anr7fblxfcrfrrgq98kzy64yrwygc2wdgi47skdmjxhi3wbrvxz"))))
+    (build-system trivial-build-system)
+    (arguments
+     `(#:modules ((guix build utils))
+       #:builder (begin
+                   (use-modules (guix build utils))
+                   (let ((source (assoc-ref %build-inputs "source"))
+                         (fw-dir (string-append %output "/lib/firmware/")))
+                     (mkdir-p fw-dir)
+                     (copy-recursively source fw-dir)
+                     #t))))
+
+    (home-page "")
+    (synopsis "Non-free firmware for Linux")
+    (description "Non-free firmware for Linux")
+    ;; FIXME: What license?
+    (license (license:non-copyleft "http://git.kernel.org/?p=linux/kernel/git/firmware/linux-firmware.git;a=blob_plain;f=LICENCE.radeon_firmware;hb=HEAD"))))
+
+(define-public linux-nonfree
+  (let* ((version "5.0.11"))
+    (package
+     (inherit linux-libre)
+     (name "linux-nonfree")
+     (version version)
+     (source (origin
+              (method url-fetch)
+              (uri (linux-nonfree-urls version))
+              (sha256
+               (base32
+                "183zjm2y5fy4djpc7lqwqiv8mb1azhq2iwpfg4p81lyaclv65nqq"))))
+     (synopsis "Mainline Linux kernel, nonfree binary blobs included.")
+     (description "Linux is a kernel.")
+     (license license:gpl2)
+     (home-page "http://kernel.org/"))))
+
+(define intel-backlight
+  "
+Section \"Device\"
+        Identifier  \"Intel Graphics\"
+        Driver      \"intel\"
+        Option      \"Backlight\"  \"intel_backlight\"
+EndSection")
+
+(define touchpad
+  "
+Section \"InputClass\"
+        Identifier  \"Touchpad\"
+        Driver      \"libinput\"
+        MatchIsTouchpad \"on\"
+        Option \"Tapping\" \"on\"
+        Option \"ClickMethod\" \"clickfinger\"
+EndSection")
+
+;; This doesn't seem to be exported by the xorg module, so I have to define it
+;; manually.
+(define %default-xorg-server-arguments
+  ;; Default command-line arguments for X.
+  '("-nolisten" "tcp"))
 
 (operating-system
-  (locale "en_US.utf8")
-  (timezone "Europe/Stockholm")
-  (keyboard-layout
-    (keyboard-layout "us" "altgr-intl"))
-  (bootloader
-    (bootloader-configuration
-      (bootloader grub-efi-bootloader)
-      (target "/boot/efi")
-      (keyboard-layout keyboard-layout)))
-  (mapped-devices
-    (list (mapped-device
-            (source
-              (uuid "3e8d8072-ee94-407a-9d04-f2f62e1b3743"))
-            (target "cryptroot")
-            (type luks-device-mapping))))
-  (file-systems
-    (cons* (file-system
-             (mount-point "/")
-             (device "/dev/mapper/cryptroot")
-             (type "ext4")
-             (dependencies mapped-devices))
-           (file-system
-             (mount-point "/boot/efi")
-             (device (uuid "FF1E-537C" 'fat32))
-             (type "vfat"))
-           %base-file-systems))
-  (host-name "spiral")
-  (users (cons* (user-account
-                  (name "jojo")
-                  (comment "It's Ya Boii")
-                  (group "users")
-                  (home-directory "/home/jojo")
-                  (supplementary-groups
-                    '("wheel" "netdev" "audio" "video")))
-                %base-user-accounts))
-  (packages
-    (cons* (specification->package "nss-certs")
-           git
-           file
-           icecat
-           %base-packages))
-  (services
-    (append
-      (list (service gnome-desktop-service-type)
-            (set-xorg-configuration
-              (xorg-configuration
-                (keyboard-layout keyboard-layout))))
-      %desktop-services)))
+ (host-name "spiral")
+ (timezone "Europe/Stockholm")
+ (locale "en_US.utf8")
+ (keyboard-layout
+  (keyboard-layout "us" "altgr-intl" #:options '("ctrl:nocaps")))
+ (kernel linux-nonfree)
+ (firmware (cons* linux-firmware-non-free
+                  %base-firmware))
+
+ ;; Use the UEFI variant of GRUB with the EFI System
+ ;; Partition mounted on /boot/efi.
+ (bootloader (bootloader-configuration
+              (bootloader grub-efi-bootloader)
+              (target "/boot/efi")
+              (keyboard-layout keyboard-layout)))
+
+ ;; Specify a mapped device for the encrypted root partition.
+ ;; The UUID is that returned by 'cryptsetup luksUUID'.
+ (mapped-devices
+  (list (mapped-device
+         (source (uuid "3e8d8072-ee94-407a-9d04-f2f62e1b3743"))
+         (target "cryptroot")
+         (type luks-device-mapping))))
+
+ (file-systems (cons* (file-system (device (uuid "FF1E-537C" 'fat32))
+                                   (mount-point "/boot/efi")
+                                   (type "vfat"))
+                      (file-system (device "/dev/mapper/cryptroot")
+                                   (mount-point "/")
+                                   (type "ext4")
+                                   (dependencies mapped-devices))
+                      %base-file-systems))
+
+ (users (cons (user-account
+               (name "jojo")
+               (comment "Me")
+               (group "users")
+               (supplementary-groups '("wheel"
+                                       "netdev"
+                                       "audio"
+                                       "video"))
+               (home-directory "/home/jojo"))
+              %base-user-accounts))
+
+ ;; This is where we specify system-wide packages.
+ (packages (cons* nss-certs		; HTTPS access
+                  ;;
+                  ;; Important general packages
+                  screen
+                  git
+                  emacs
+                  syncthing
+                  gdb
+                  file
+                  xdg-utils ;; Supplies xdg-open
+                  ;;
+                  ;; GUI. EXWM Window manager
+                  emacs-exwm
+                  font-dejavu
+                  xinput
+                  xrandr
+                  xbacklight
+                  setxkbmap
+                  xset
+                  xss-lock
+                  stalonetray
+                  ;; pasystray
+                  network-manager-applet
+                  ;; qsyncthingtray depends on qtwebkit which is very slow to
+                  ;; build and doesn't seem to get built by the CI (at least not
+                  ;; frequently).
+                  ;; qsyncthingtray
+                  adwaita-icon-theme
+                  python-beautifulsoup4
+                  ;;
+                  ;; Misc useful packages
+                  icecat
+                  lm-sensors
+                  python
+                  ;;
+                  %base-packages))
+
+ (services (cons* (service slim-service-type
+                           (slim-configuration
+                            (xorg-configuration
+                             (xorg-configuration
+                              (keyboard-layout keyboard-layout)
+                              (server-arguments (cons* "-ardelay" "200"
+                                                       "-arinterval" "20"
+                                                       %default-xorg-server-arguments))
+                              (extra-config (list intel-backlight
+                                                  touchpad))))))
+                  (service openssh-service-type
+                           (openssh-configuration
+                            (port-number 22)))
+                  (extra-special-file "/usr/bin/sh" (file-append bash "/bin/sh"))
+                  (extra-special-file "/bin/bash" (file-append bash "/bin/bash"))
+                  (extra-special-file "/usr/bin/bash" (file-append bash "/bin/bash"))
+                  (extra-special-file "/usr/bin/python3" (file-append python "/bin/python3"))
+                  (extra-special-file "/usr/bin/python" (file-append python "/bin/python3"))
+                  (remove (lambda (service)
+                            (eq? (service-kind service) gdm-service-type))
+                          %desktop-services)))
+
+ ;; Allow resolution of '.local' host names with mDNS.
+ (name-service-switch %mdns-host-lookup-nss))
