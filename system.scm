@@ -25,7 +25,8 @@
                      python
                      python-xyz
 		     xdisorg
-                     freedesktop)
+                     freedesktop
+                     pulseaudio)
 
 (define (linux-nonfree-urls version)
   "Return a list of URLs for Linux-Nonfree VERSION."
@@ -159,6 +160,8 @@ EndSection")
                   gdb
                   file
                   xdg-utils ;; Supplies xdg-open
+                  alsa-utils ;; Supplies amixer
+                  pavucontrol
                   ;;
                   ;; GUI. EXWM Window manager
                   emacs-exwm
@@ -170,7 +173,6 @@ EndSection")
                   xset
                   xss-lock
                   stalonetray
-                  ;; pasystray
                   adwaita-icon-theme
                   python-beautifulsoup4
                   ;;
