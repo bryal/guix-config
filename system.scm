@@ -173,8 +173,9 @@ EndSection")
                   xset
                   xss-lock
                   stalonetray
+                  ;; These themes together make networkmanager look all correct.
                   adwaita-icon-theme
-                  python-beautifulsoup4
+                  hicolor-icon-theme
                   ;;
                   ;; Misc useful packages
                   icecat
