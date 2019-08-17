@@ -9,6 +9,7 @@
 (use-package-modules certs
                      bash
 		     screen
+                     ncurses
 		     linux
 		     version-control
 		     emacs
@@ -80,7 +81,7 @@
      (license license:gpl2)
      (home-page "http://kernel.org/"))))
 
-(define intel-backlight
+(define intel-xorg-conf
   "
 Section \"Device\"
         Identifier  \"Intel Graphics\"
@@ -88,7 +89,7 @@ Section \"Device\"
         Option      \"Backlight\"  \"intel_backlight\"
 EndSection")
 
-(define touchpad
+(define touchpad-xorg-conf
   "
 Section \"InputClass\"
         Identifier  \"Touchpad\"
@@ -151,20 +152,17 @@ EndSection")
 
  ;; This is where we specify system-wide packages.
  (packages (cons* nss-certs		; HTTPS access
-                  ;;
-                  ;; Important general packages
                   screen
                   git
                   emacs
                   syncthing
                   gdb
                   file
+                  ncurses ;; Supplies terminal commands `reset` and `clear`
                   xdg-utils ;; Supplies xdg-open
                   alsa-utils ;; Supplies amixer
                   pavucontrol
-                  ;;
-                  ;; GUI. EXWM Window manager
-                  emacs-exwm
+                  emacs-exwm ;; Supplies desktop manager with exwm entry
                   font-dejavu
                   xinput
                   xrandr
@@ -176,12 +174,9 @@ EndSection")
                   ;; These themes together make networkmanager look all correct.
                   adwaita-icon-theme
                   hicolor-icon-theme
-                  ;;
-                  ;; Misc useful packages
                   icecat
                   lm-sensors
                   python
-                  ;;
                   %base-packages))
 
  (services (cons* (service slim-service-type
@@ -193,8 +188,8 @@ EndSection")
                               (server-arguments (cons* "-ardelay" "200"
                                                        "-arinterval" "20"
                                                        %default-xorg-server-arguments))
-                              (extra-config (list intel-backlight
-                                                  touchpad))))))
+                              (extra-config (list intel-xorg-conf
+                                                  touchpad-xorg-conf))))))
                   (service openssh-service-type
                            (openssh-configuration
                             (port-number 22)))
