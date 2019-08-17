@@ -63,7 +63,7 @@
     (license (license:non-copyleft "http://git.kernel.org/?p=linux/kernel/git/firmware/linux-firmware.git;a=blob_plain;f=LICENCE.radeon_firmware;hb=HEAD"))))
 
 (define-public linux-nonfree
-  (let* ((version "5.0.11"))
+  (let* ((version "5.2.9"))
     (package
      (inherit linux-libre)
      (name "linux-nonfree")
@@ -73,7 +73,7 @@
               (uri (linux-nonfree-urls version))
               (sha256
                (base32
-                "183zjm2y5fy4djpc7lqwqiv8mb1azhq2iwpfg4p81lyaclv65nqq"))))
+                "1rnlnphw9rih4qhdld9ic5lnj5jh4vy5nqbj9lqwv9bc615jmw5n"))))
      (synopsis "Mainline Linux kernel, nonfree binary blobs included.")
      (description "Linux is a kernel.")
      (license license:gpl2)
@@ -171,11 +171,6 @@ EndSection")
                   xss-lock
                   stalonetray
                   ;; pasystray
-                  network-manager-applet
-                  ;; qsyncthingtray depends on qtwebkit which is very slow to
-                  ;; build and doesn't seem to get built by the CI (at least not
-                  ;; frequently).
-                  ;; qsyncthingtray
                   adwaita-icon-theme
                   python-beautifulsoup4
                   ;;
@@ -188,6 +183,7 @@ EndSection")
 
  (services (cons* (service slim-service-type
                            (slim-configuration
+                            (default-user "jojo")
                             (xorg-configuration
                              (xorg-configuration
                               (keyboard-layout keyboard-layout)
