@@ -27,7 +27,8 @@
                      python-xyz
 		     xdisorg
                      freedesktop
-                     pulseaudio)
+                     pulseaudio
+                     ssh)
 
 (define (linux-nonfree-urls version)
   "Return a list of URLs for Linux-Nonfree VERSION."
