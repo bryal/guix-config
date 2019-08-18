@@ -100,6 +100,14 @@ Section \"InputClass\"
         Option \"ClickMethod\" \"clickfinger\"
 EndSection")
 
+(define touchscreen-xorg-conf
+  "
+Section \"InputClass\"
+    Identifier         \"Touchscreen catchall\"
+    MatchIsTouchscreen \"on\"
+    Option \"Ignore\" \"on\"
+EndSection")
+
 ;; This doesn't seem to be exported by the xorg module, so I have to define it
 ;; manually.
 (define %default-xorg-server-arguments
@@ -191,7 +199,8 @@ EndSection")
                                                         "-arinterval" "20"
                                                         %default-xorg-server-arguments))
                                (extra-config (list intel-xorg-conf
-                                                   touchpad-xorg-conf))))))
+                                                   touchpad-xorg-conf
+                                                   touchscreen-xorg-conf))))))
                    (service openssh-service-type
                             (openssh-configuration
                              (port-number 22)))
