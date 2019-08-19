@@ -20,7 +20,6 @@
 		     xorg
 		     fonts
 		     gnuzilla
-		     stalonetray
                      gdb
                      file
                      python
@@ -28,7 +27,8 @@
 		     xdisorg
                      freedesktop
                      pulseaudio
-                     ssh)
+                     ssh
+                     games)
 
 (define (linux-nonfree-urls version)
   "Return a list of URLs for Linux-Nonfree VERSION."
@@ -174,6 +174,7 @@ EndSection")
                    alsa-utils ;; Supplies amixer
                    pavucontrol
                    emacs-exwm ;; Supplies desktop manager with exwm entry
+                   fortune-mod
                    font-dejavu
                    xinput
                    xrandr
@@ -181,7 +182,6 @@ EndSection")
                    setxkbmap
                    xset
                    xss-lock
-                   stalonetray
                    ;; These themes together make networkmanager look all correct.
                    adwaita-icon-theme
                    hicolor-icon-theme
