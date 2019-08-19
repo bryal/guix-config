@@ -135,27 +135,28 @@ EndSection")
   ;; The UUID is that returned by 'cryptsetup luksUUID'.
   (mapped-devices
    (list (mapped-device
-          (source (uuid "3e8d8072-ee94-407a-9d04-f2f62e1b3743"))
+          (source (uuid "d69b0e7a-75e0-4108-bfe9-a45421022ddb"))
           (target "cryptroot")
           (type luks-device-mapping))))
 
-  (file-systems (cons* (file-system (device (uuid "FF1E-537C" 'fat32))
-                                    (mount-point "/boot/efi")
-                                    (type "vfat"))
-                       (file-system (device "/dev/mapper/cryptroot")
-                                    (mount-point "/")
-                                    (type "ext4")
-                                    (dependencies mapped-devices))
-                       %base-file-systems))
+  (file-systems
+   (cons* (file-system
+            (mount-point "/boot/efi")
+            (device (uuid "6833-FE5F" 'fat32))
+            (type "vfat"))
+          (file-system
+            (mount-point "/")
+            (device "/dev/mapper/cryptroot")
+            (type "ext4")
+            (dependencies mapped-devices))
+          %base-file-systems))
 
   (users (cons (user-account
                 (name "jojo")
                 (comment "Me")
                 (group "users")
-                (supplementary-groups '("wheel"
-                                        "netdev"
-                                        "audio"
-                                        "video"))
+                (supplementary-groups
+                 '("wheel" "netdev" "audio" "video"))
                 (home-directory "/home/jojo"))
                %base-user-accounts))
 
