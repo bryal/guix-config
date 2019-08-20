@@ -129,6 +129,12 @@ EndSection")
   (bootloader (bootloader-configuration
                (bootloader grub-efi-bootloader)
                (target "/boot/efi")
+               (timeout 2)
+               (menu-entries (list (menu-entry
+                                    (label "Arch Linux")
+                                    (linux "(hd0,gpt2)/boot/vmlinuz-linux")
+                                    (linux-arguments '("root=/dev/sda2"))
+                                    (initrd "(hd0,gpt2)/boot/initramfs-linux.img"))))
                (keyboard-layout keyboard-layout)))
 
   ;; Specify a mapped device for the encrypted root partition.
@@ -150,6 +156,8 @@ EndSection")
             (type "ext4")
             (dependencies mapped-devices))
           %base-file-systems))
+
+  (swap-devices '("/dev/sda4"))
 
   (users (cons (user-account
                 (name "jojo")
