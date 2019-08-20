@@ -39,7 +39,7 @@
 (define-public linux-firmware-non-free
   (package
     (name "linux-firmware-non-free")
-    (version "07b925b450bfb4cf3e141c612ec5b104658cd020")
+    (version "92e17d0dd2437140fab044ae62baf69b35d7d1fa")
     (source (origin
               (method git-fetch)
               (uri (git-reference
