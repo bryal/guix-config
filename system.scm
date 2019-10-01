@@ -80,6 +80,8 @@ EndSection")
                                    (linux "(hd0,gpt2)/boot/vmlinuz-linux")
                                    (linux-arguments '("root=/dev/sda2"))
                                    (initrd "(hd0,gpt2)/boot/initramfs-linux.img"))))
+              ;; 0 -> Current guix, 1..<n-1 -> menu-entries, n-1 -> Previous guix
+              (default-entry 1)
               (keyboard-layout keyboard-layout)))
 
  ;; Specify a mapped device for the encrypted root partition.
