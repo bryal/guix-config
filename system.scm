@@ -4,6 +4,7 @@
 	     (guix packages)
 	     (guix git-download)
 	     (guix build-system trivial)
+	     (guix build-system font)
 	     ((guix licenses) #:prefix license:)
 	     (guix download)
              (srfi srfi-1))
@@ -58,112 +59,165 @@ EndSection")
   ;; Default command-line arguments for X.
   '("-nolisten" "tcp"))
 
+(define (linux-nonfree-urls version)
+  "Return a list of URLs for Linux-Nonfree VERSION."
+  (list (string-append
+         "https://www.kernel.org/pub/linux/kernel/v5.x/"
+         "linux-" version ".tar.xz")))
+
+(define-public linux-firmware-non-free
+  (package
+    (name "linux-firmware-non-free")
+    (version "b2cad6a2d733d9b10d25a31874a51d96908d6e89")
+    (source (origin
+              (method git-fetch)
+              (uri (git-reference
+                    (url "git://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git")
+                    (commit version)))
+              (sha256
+               (base32
+                "19l5gkhygxm17biz0fs9jqm8fyjb5h9901xkpij0hxabnf7l0qzr"))))
+    (build-system trivial-build-system)
+    (arguments
+     `(#:modules ((guix build utils))
+       #:builder (begin
+                   (use-modules (guix build utils))
+                   (let ((source (assoc-ref %build-inputs "source"))
+                         (fw-dir (string-append %output "/lib/firmware/")))
+                     (mkdir-p fw-dir)
+                     (copy-recursively source fw-dir)
+                     #t))))
+
+    (home-page "")
+    (synopsis "Non-free firmware for Linux")
+    (description "Non-free firmware for Linux")
+    ;; FIXME: What license?
+    (license (license:non-copyleft "http://git.kernel.org/?p=linux/kernel/git/firmware/linux-firmware.git;a=blob_plain;f=LICENCE.radeon_firmware;hb=HEAD"))))
+
+(define-public linux-nonfree
+  (let* ((version "5.6.9"))
+    (package
+      (inherit linux-libre)
+      (name "linux-nonfree")
+      (version version)
+      (source (origin
+                (method url-fetch)
+                (uri (linux-nonfree-urls version))
+                (sha256
+                 (base32
+                  "14w09iqdy65zkbymqiybvm7z92gmf5bz0wgd5r79r1b6ccz7347a"))))
+      (synopsis "Mainline Linux kernel, nonfree binary blobs included.")
+      (description "Linux is a kernel.")
+      (license license:gpl2)
+      (home-page "http://kernel.org/"))))
+
+(define-public font-iosevka-ss09
+  (package
+    (inherit font-iosevka)
+    (name "font-iosevka-ss09")
+    (version "3.0.0-rc.8")
+    (source
+     (origin
+       (method url-fetch/zipbomb)
+       (uri (string-append "https://github.com/be5invis/Iosevka"
+                           "/releases/download/v" version
+                           "/ttc-iosevka-" version ".zip"))
+       (sha256 (base32 "1hzv37g6791k4rgdldn0rzj65yajvvjbr95rql5b35mcaizvwp5m"))))))
+
 (operating-system
- (host-name "spiral")
- (timezone "Europe/Stockholm")
- (locale "en_US.utf8")
- (keyboard-layout
-  (keyboard-layout "us" "altgr-intl" #:options '("ctrl:nocaps")))
+  (host-name "astoria")
+  (timezone "Europe/Stockholm")
+  (locale "en_US.utf8")
+  (keyboard-layout
+   (keyboard-layout "us" "altgr-intl" #:options '("ctrl:nocaps")))
 
- ;; Use the UEFI variant of GRUB with the EFI System
- ;; Partition mounted on /boot/efi.
- (bootloader (bootloader-configuration
-              (bootloader grub-efi-bootloader)
-              (target "/boot/efi")
-              (timeout 2)
-              (menu-entries (list (menu-entry
-                                   (label "Arch Linux")
-                                   (linux "(hd0,gpt2)/boot/vmlinuz-linux")
-                                   (linux-arguments '("root=/dev/sda2"))
-                                   (initrd "(hd0,gpt2)/boot/initramfs-linux.img"))))
-              ;; 0 -> Current guix, 1..<n-1 -> menu-entries, n-1 -> Previous guix
-              (default-entry 1)
-              (keyboard-layout keyboard-layout)))
+  (kernel linux-nonfree)
+  (firmware (cons* linux-firmware-non-free %base-firmware))
 
- ;; Specify a mapped device for the encrypted root partition.
- ;; The UUID is that returned by 'cryptsetup luksUUID'.
- (mapped-devices
-  (list (mapped-device
-         (source (uuid "d69b0e7a-75e0-4108-bfe9-a45421022ddb"))
-         (target "cryptroot")
-         (type luks-device-mapping))))
+  ;; Use the UEFI variant of GRUB with the EFI System
+  ;; Partition mounted on /boot/efi.
+  (bootloader (bootloader-configuration
+               (bootloader grub-efi-bootloader)
+               (target "/boot/efi")
+               (timeout 1.2)
+               ;; 0 -> Current guix, 1..<n-1 -> menu-entries, n-1 -> Previous guix
+               (default-entry 0)
+               (keyboard-layout keyboard-layout)))
 
- (file-systems
-  (cons* (file-system
-          (mount-point "/boot/efi")
-          (device (uuid "6833-FE5F" 'fat32))
-          (type "vfat"))
-         (file-system
-          (mount-point "/")
-          (device "/dev/mapper/cryptroot")
-          (type "ext4")
-          (dependencies mapped-devices))
-         %base-file-systems))
+  (file-systems
+   (cons* (file-system
+            (mount-point "/boot/efi")
+            (device "/dev/nvme0n1p1")
+            (type "vfat"))
+          (file-system
+            (mount-point "/")
+            (device "/dev/nvme0n1p2")
+            (type "ext4"))
+          %base-file-systems))
 
- (swap-devices '("/dev/sda4"))
+  (swap-devices '("/dev/nvme0n1p3"))
 
- (users (cons (user-account
-               (name "jojo")
-               (comment "Me")
-               (group "users")
-               (supplementary-groups
-                '("wheel" "netdev" "audio" "video"))
-               (home-directory "/home/jojo"))
-              %base-user-accounts))
+  (users (cons (user-account
+                (name "jojo")
+                (group "users")
+                (supplementary-groups
+                 '("wheel" "netdev" "audio" "video"))
+                (home-directory "/home/jojo"))
+               %base-user-accounts))
 
- ;; This is where we specify system-wide packages.
- (packages (cons* nss-certs		; HTTPS access
-                  screen
-                  git
-                  emacs
-                  syncthing
-                  gdb
-                  file
-                  openssh
-                  ncurses ;; Supplies terminal commands `reset` and `clear`
-                  xdg-utils ;; Supplies xdg-open
-                  alsa-utils ;; Supplies amixer
-                  pavucontrol
-                  emacs-exwm ;; Supplies desktop manager with exwm entry
-                  fortune-mod
-                  font-dejavu
-                  xinput
-                  xrandr
-                  xbacklight
-                  setxkbmap
-                  xset
-                  xss-lock
-                  ;; These themes together make networkmanager look all correct.
-                  adwaita-icon-theme
-                  hicolor-icon-theme
-                  icecat
-                  lm-sensors
-                  python
-                  %base-packages))
+  ;; This is where we specify system-wide packages.
+  (packages (cons* nss-certs		; HTTPS access
+                   screen
+                   git
+                   emacs
+                   syncthing
+                   gdb
+                   file
+                   openssh
+                   ncurses ;; Supplies terminal commands `reset` and `clear`
+                   xdg-utils ;; Supplies xdg-open
+                   alsa-utils ;; Supplies amixer
+                   pavucontrol
+                   emacs-exwm ;; Supplies desktop manager with exwm entry
+                   font-dejavu
+                   font-iosevka-ss09
+                   xinput
+                   xrandr
+                   xbacklight
+                   setxkbmap
+                   xset
+                   xss-lock
+                   ;; These themes together make networkmanager look all correct.
+                   adwaita-icon-theme
+                   hicolor-icon-theme
+                   icecat
+                   lm-sensors
+                   python
+                   %base-packages))
 
- (services (cons* (service slim-service-type
-                           (slim-configuration
-                            (default-user "jojo")
-                            (xorg-configuration
-                             (xorg-configuration
-                              (keyboard-layout keyboard-layout)
-                              (server-arguments (cons* "-ardelay" "200"
-                                                       "-arinterval" "20"
-                                                       %default-xorg-server-arguments))
-                              (extra-config (list intel-xorg-conf
-                                                  touchpad-xorg-conf
-                                                  touchscreen-xorg-conf))))))
-                  (service openssh-service-type
-                           (openssh-configuration
-                            (port-number 22)))
-                  (extra-special-file "/usr/bin/sh" (file-append bash "/bin/sh"))
-                  (extra-special-file "/bin/bash" (file-append bash "/bin/bash"))
-                  (extra-special-file "/usr/bin/bash" (file-append bash "/bin/bash"))
-                  (extra-special-file "/usr/bin/python3" (file-append python "/bin/python3"))
-                  (extra-special-file "/usr/bin/python" (file-append python "/bin/python3"))
-                  (remove (lambda (service)
-                            (eq? (service-kind service) gdm-service-type))
-                          %desktop-services)))
+  (services
+   (cons* (service slim-service-type
+                   (slim-configuration
+                    (default-user "jojo")
+                    (xorg-configuration
+                     (xorg-configuration
+                      (keyboard-layout keyboard-layout)
+                      (server-arguments (cons* "-ardelay" "210"
+                                               "-arinterval" "25"
+                                               %default-xorg-server-arguments))
+                      (extra-config (list intel-xorg-conf
+                                          touchpad-xorg-conf))))))
+          (service openssh-service-type
+                   (openssh-configuration
+                    (port-number 22)))
+          (extra-special-file "/usr/bin/sh" (file-append bash "/bin/sh"))
+          (extra-special-file "/bin/bash" (file-append bash "/bin/bash"))
+          (extra-special-file "/usr/bin/bash" (file-append bash "/bin/bash"))
+          (extra-special-file "/usr/bin/python3" (file-append python "/bin/python3"))
+          (extra-special-file "/usr/bin/python" (file-append python "/bin/python3"))
+          (remove (lambda (service)
+                    (eq? (service-kind service) gdm-service-type))
+                  %desktop-services)))
 
- ;; Allow resolution of '.local' host names with mDNS.
- (name-service-switch %mdns-host-lookup-nss))
+  ;; Allow resolution of '.local' host names with mDNS.
+  (name-service-switch %mdns-host-lookup-nss))
