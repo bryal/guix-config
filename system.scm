@@ -46,16 +46,10 @@ Section \"InputClass\"
         Identifier  \"Touchpad\"
         Driver      \"libinput\"
         MatchIsTouchpad \"on\"
+        Option \"AccelSpeed\" \"0.7\"
         Option \"Tapping\" \"on\"
         Option \"ClickMethod\" \"clickfinger\"
-EndSection")
-
-(define touchscreen-xorg-conf
-  "
-Section \"InputClass\"
-    Identifier         \"Touchscreen catchall\"
-    MatchIsTouchscreen \"on\"
-    Option \"Ignore\" \"on\"
+        Option \"DisableWhileTyping\" \"true\"
 EndSection")
 
 ;; This doesn't seem to be exported by the xorg module, so I have to define it
