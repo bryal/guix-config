@@ -1,3 +1,5 @@
+;; -*- eval: (guix-devel-mode) -*-
+
 (use-modules (gnu)
 	     (guix packages)
 	     (guix git-download)
