@@ -7,8 +7,9 @@
 	     (guix build-system font)
 	     ((guix licenses) #:prefix license:)
 	     (guix download)
-             (srfi srfi-1))
-(use-service-modules shepherd networking ssh desktop xorg)
+             (srfi srfi-1)
+             (firefox))
+(use-service-modules shepherd networking ssh desktop xorg sysctl)
 (use-package-modules certs
                      bash
 		     screen
@@ -22,7 +23,6 @@
 		     sync
 		     xorg
 		     fonts
-		     gnuzilla
                      gdb
                      file
                      python
@@ -193,7 +193,7 @@ EndSection")
                    ;; These themes together make networkmanager look all correct.
                    adwaita-icon-theme
                    hicolor-icon-theme
-                   icecat
+                   firefox
                    lm-sensors
                    python
                    %base-packages))
