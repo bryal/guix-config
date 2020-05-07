@@ -210,6 +210,9 @@ EndSection")
           (service openssh-service-type
                    (openssh-configuration
                     (port-number 22)))
+          (service sysctl-service-type
+                   (sysctl-configuration
+                    (settings '(("fs.inotify.max_user_watches" . "256000")))))
           (extra-special-file "/usr/bin/sh" (file-append bash "/bin/sh"))
           (extra-special-file "/bin/bash" (file-append bash "/bin/bash"))
           (extra-special-file "/usr/bin/bash" (file-append bash "/bin/bash"))
