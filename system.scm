@@ -51,9 +51,7 @@ Section \"InputClass\"
         Driver      \"libinput\"
         MatchIsTouchpad \"on\"
         Option \"AccelSpeed\" \"0.7\"
-        Option \"Tapping\" \"on\"
         Option \"ClickMethod\" \"clickfinger\"
-        Option \"DisableWhileTyping\" \"true\"
 EndSection")
 
 ;; This doesn't seem to be exported by the xorg module, so I have to define it
