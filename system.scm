@@ -39,6 +39,9 @@ Section \"Device\"
         Identifier  \"Intel Graphics\"
         Driver      \"intel\"
         Option      \"Backlight\"  \"intel_backlight\"
+        Option      \"AccelMethod\" \"sna\"
+        Option      \"DRI\" \"3\"
+        Option      \"TearFree\"  \"true\"
 EndSection")
 
 (define touchpad-xorg-conf
