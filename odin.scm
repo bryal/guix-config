@@ -109,8 +109,8 @@
           (simple-service 'jo.zone httpd-service-type
                           (simple-https-website "jo.zone"
                                                 "/home/jojo/Syncthing/jo-zone"))
-          (simple-service 'carth.jo.zone httpd-service-type
-                          (simple-https-website "carth.jo.zone"
+          (simple-service 'carth.pink httpd-service-type
+                          (simple-https-website "carth.pink"
                                                 "/home/jojo/Hack/carth-website"))
           (service httpd-service-type
                    (httpd-configuration
@@ -126,7 +126,7 @@
                     (webroot "/srv/http")
                     (certificates
                      (list (certificate-configuration (domains '("jo.zone")))
-                           (certificate-configuration (domains '("carth.jo.zone")))))))
+                           (certificate-configuration (domains '("carth.pink")))))))
           (service openssh-service-type
                    (openssh-configuration
                     (port-number 22)))
