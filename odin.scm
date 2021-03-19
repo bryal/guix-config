@@ -8,7 +8,7 @@
 	     ((guix licenses) #:prefix license:)
 	     (guix download)
              (srfi srfi-1))
-(use-service-modules shepherd networking ssh desktop xorg sysctl web certbot)
+(use-service-modules shepherd networking dns ssh desktop xorg sysctl web certbot)
 (use-package-modules certs bash screen ncurses linux version-control emacs
                      emacs-xyz gnome syncthing sync xorg fonts gdb file python
                      python-xyz xdisorg freedesktop pulseaudio ssh games
@@ -128,6 +128,13 @@
                     (certificates
                      (list (certificate-configuration (domains '("jo.zone")))
                            (certificate-configuration (domains '("carth.pink")))))))
+          (service ddclient-service-type
+                   (ddclient-configuration
+                    (mail "jo@jo.zone")
+                    (mail-failure "jo@jo.zone")
+                    ;; Additional conf in /etc/ddclient/secrets.conf. See
+                    ;; ~/my-conf/SETUP.org for more info.
+                    ))
           (service openssh-service-type
                    (openssh-configuration
                     (port-number 22)))
