@@ -89,7 +89,7 @@
                    xdg-utils            ; Supplies xdg-open
                    alsa-utils           ; Supplies amixer
                    emacs-exwm           ; Supplies desktop manager with exwm entry
-                   pavucontrol font-dejavu font-iosevka-ss09
+                   pulseaudio paprefs pavucontrol font-dejavu font-iosevka-ss09
                    xinput xrandr xbacklight setxkbmap xset xss-lock
                    ;; These themes together make networkmanager look all correct.
                    adwaita-icon-theme hicolor-icon-theme
