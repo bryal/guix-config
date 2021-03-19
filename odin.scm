@@ -100,6 +100,7 @@
    (cons* (service slim-service-type
                    (slim-configuration
                     (default-user "jojo")
+                    (auto-login? #t)
                     (xorg-configuration
                      (xorg-configuration
                       (keyboard-layout keyboard-layout)
