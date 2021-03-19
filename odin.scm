@@ -137,7 +137,11 @@
                     ))
           (service openssh-service-type
                    (openssh-configuration
-                    (port-number 22)))
+                    (port-number 22)
+                    (x11-forwarding? #t)
+                    (extra-content "\
+ListenAddress 0.0.0.0
+ListenAddress [::]:443")))
           (service sysctl-service-type
                    (sysctl-configuration
                     (settings '(("fs.inotify.max_user_watches" . "256000")))))
