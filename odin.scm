@@ -12,7 +12,7 @@
 (use-package-modules certs bash screen ncurses linux version-control emacs
                      emacs-xyz gnome syncthing sync xorg fonts gdb file python
                      python-xyz xdisorg freedesktop pulseaudio ssh games
-                     gnuzilla)
+                     gnuzilla mail)
 
 ;; This doesn't seem to be exported by the xorg module, so I have to define it
 ;; manually.
@@ -84,7 +84,7 @@
 
   ;; This is where we specify system-wide packages.
   (packages (cons* nss-certs            ; HTTPS access
-                   screen git emacs syncthing gdb file openssh
+                   screen git emacs syncthing gdb file openssh sendmail
                    ncurses              ; Supplies terminal commands `reset` and `clear`
                    xdg-utils            ; Supplies xdg-open
                    alsa-utils           ; Supplies amixer
