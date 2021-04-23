@@ -8,7 +8,7 @@
 	     ((guix licenses) #:prefix license:)
 	     (guix download)
              (srfi srfi-1))
-(use-service-modules shepherd networking dns ssh desktop xorg sysctl web certbot)
+(use-service-modules shepherd networking dns ssh desktop xorg sysctl web certbot syncthing audio)
 (use-package-modules certs bash screen ncurses linux version-control emacs
                      emacs-xyz gnome syncthing sync xorg fonts gdb file python
                      python-xyz xdisorg freedesktop pulseaudio ssh games
@@ -84,7 +84,7 @@
 
   ;; This is where we specify system-wide packages.
   (packages (cons* nss-certs            ; HTTPS access
-                   screen git emacs syncthing gdb file openssh sendmail
+                   screen git emacs syncthing gdb file openssh sendmail net-tools
                    ncurses              ; Supplies terminal commands `reset` and `clear`
                    xdg-utils            ; Supplies xdg-open
                    alsa-utils           ; Supplies amixer
@@ -96,7 +96,15 @@
                    %base-packages))
 
   (services
-   (cons* (simple-service 'jo.zone httpd-service-type
+   (cons* (service syncthing-service-type
+                   (syncthing-configuration (user "jojo")))
+          ;; Partly exists just so that Pulseaudio is always on for user
+          (service mpd-service-type (mpd-configuration (user "jojo")
+                                                       (port "6600")
+                                                       (address "192.168.0.41")
+                                                       (music-dir "~/Transcoded")
+                                                       (outputs (list (mpd-output (always-on? #t))))))
+          (simple-service 'jo.zone httpd-service-type
                           (simple-https-website "jo.zone"
                                                 "/home/jojo/Syncthing/jo-zone"))
           (simple-service 'carth.pink httpd-service-type
