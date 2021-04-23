@@ -88,7 +88,6 @@
                    ncurses              ; Supplies terminal commands `reset` and `clear`
                    xdg-utils            ; Supplies xdg-open
                    alsa-utils           ; Supplies amixer
-                   emacs-exwm           ; Supplies desktop manager with exwm entry
                    pulseaudio paprefs pavucontrol font-dejavu font-iosevka-ss09
                    xinput xrandr xbacklight setxkbmap xset xss-lock
                    ;; These themes together make networkmanager look all correct.
@@ -97,17 +96,7 @@
                    %base-packages))
 
   (services
-   (cons* (service slim-service-type
-                   (slim-configuration
-                    (default-user "jojo")
-                    (auto-login? #t)
-                    (xorg-configuration
-                     (xorg-configuration
-                      (keyboard-layout keyboard-layout)
-                      (server-arguments (cons* "-ardelay" "210"
-                                               "-arinterval" "25"
-                                               %default-xorg-server-arguments))))))
-          (simple-service 'jo.zone httpd-service-type
+   (cons* (simple-service 'jo.zone httpd-service-type
                           (simple-https-website "jo.zone"
                                                 "/home/jojo/Syncthing/jo-zone"))
           (simple-service 'carth.pink httpd-service-type
@@ -151,7 +140,8 @@ ListenAddress [::]:443")))
           (extra-special-file "/usr/bin/python3" (file-append python "/bin/python3"))
           (extra-special-file "/usr/bin/python" (file-append python "/bin/python3"))
           (remove (lambda (service)
-                    (eq? (service-kind service) gdm-service-type))
+                    (or (eq? (service-kind service) gdm-service-type)
+                        (eq? (service-kind service) sysctl-service-type)))
                   %desktop-services)))
 
   ;; Allow resolution of '.local' host names with mDNS.
