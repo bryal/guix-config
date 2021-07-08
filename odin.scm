@@ -57,7 +57,7 @@
 
   (bootloader (bootloader-configuration
                (bootloader grub-bootloader)
-               (target "/dev/sda")
+               (target "/dev/nvme0n1")
                (timeout 1.2)
                ;; 0 -> Current guix, 1..<n-1 -> menu-entries, n-1 -> Previous guix
                (default-entry 0)
@@ -72,7 +72,7 @@
             (type "ext4"))
           %base-file-systems))
 
-  (swap-devices '("/dev/sda2"))
+  (swap-devices (list (file-system-label "SWAP")))
 
   (users (cons (user-account
                 (name "jojo")
