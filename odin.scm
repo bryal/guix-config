@@ -8,7 +8,7 @@
 	     ((guix licenses) #:prefix license:)
 	     (guix download)
              (srfi srfi-1))
-(use-service-modules shepherd networking dns ssh desktop xorg sysctl web certbot syncthing audio)
+(use-service-modules shepherd networking dns ssh desktop xorg sysctl web certbot syncthing audio file-sharing)
 (use-package-modules certs bash screen ncurses linux version-control emacs
                      emacs-xyz gnome syncthing sync xorg fonts gdb file python
                      python-xyz xdisorg freedesktop pulseaudio ssh games
@@ -98,6 +98,24 @@
   (services
    (cons* (service syncthing-service-type
                    (syncthing-configuration (user "jojo")))
+          (service transmission-daemon-service-type
+                   (transmission-daemon-configuration
+                    (rpc-authentication-required? #t)
+                    (rpc-username "transmission")
+                    (rpc-password "{adb10747bd8da7f0a7ec25c3fddb44bd710416ffgpufxBHc")
+                    (rpc-whitelist-enabled? #t)
+                    (rpc-whitelist '("::1" "127.0.0.1" "192.168.0.*"))
+                    (download-queue-enabled? #t)
+                    (download-queue-size 8)
+                    (seed-queue-enabled? #f)
+                    (speed-limit-down-enabled? #t)
+                    (speed-limit-down (* 72 1024)) ; 72 Mbyte/s = 576 Mbit/s
+                    (speed-limit-up-enabled? #t)
+                    (speed-limit-up (* 32 1024)) ; 32 Mbyte/s = 256 Mbit/s
+                    (peer-limit-global 500)
+                    (peer-limit-per-torrent 100)
+                    (ratio-limit-enabled? #t)
+                    (ratio-limit 8.0)))
           ;; Partly exists just so that Pulseaudio is always on for user
           (service mpd-service-type (mpd-configuration (user "jojo")
                                                        (port "6600")
