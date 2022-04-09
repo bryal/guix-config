@@ -83,9 +83,12 @@
                 (name "jojo")
                 (group "users")
                 (supplementary-groups
-                 '("wheel" "netdev" "audio" "video" "transmission"))
+                 '("wheel" "netdev" "audio" "video" "transmission" "httpd" "realtime"))
                 (home-directory "/home/jojo"))
                %base-user-accounts))
+
+  (groups (cons* (user-group (system? #t) (name "realtime"))
+                 %base-groups))
 
   ;; This is where we specify system-wide packages.
   (packages (cons* nss-certs            ; HTTPS access
@@ -201,6 +204,9 @@
                     (extra-content "\
 ListenAddress 0.0.0.0
 ListenAddress [::]")))
+          (pam-limits-service
+           (list
+            (pam-limits-entry "@realtime" 'both 'nice -10)))
           (service sysctl-service-type
                    (sysctl-configuration
                     (settings '(("fs.inotify.max_user_watches" . "256000")))))
