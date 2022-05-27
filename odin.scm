@@ -49,6 +49,12 @@
                 SSLCertificateKeyFile /etc/letsencrypt/live/" domain "/privkey.pem
                 SSLCertificateChainFile /etc/letsencrypt/live/" domain "/fullchain.pem\n"))))
 
+(define httpd-reload
+  (program-file
+   "httpd-reload"
+   #~(let ((pid (call-with-input-file "/var/run/nginx/pid" read)))
+       (kill pid SIGHUP))))
+
 (operating-system
   (host-name "odin")
   (timezone "Europe/Stockholm")
@@ -191,10 +197,14 @@
                     (email "jo@jo.zone")
                     (webroot "/srv/http")
                     (certificates
-                     (list (certificate-configuration (domains '("me-mess.chat")))
-                           (certificate-configuration (domains '("jo.zone")))
-                           (certificate-configuration (domains '("carth.pink")))
-                           (certificate-configuration (domains '("fuckingshit.show")))))))
+                     (list (certificate-configuration (domains '("me-mess.chat"))
+                                                      (deploy-hook httpd-reload))
+                           (certificate-configuration (domains '("jo.zone"))
+                                                      (deploy-hook httpd-reload))
+                           (certificate-configuration (domains '("carth.pink"))
+                                                      (deploy-hook httpd-reload))
+                           (certificate-configuration (domains '("fuckingshit.show"))
+                                                      (deploy-hook httpd-reload))))))
           (service openssh-service-type
                    (openssh-configuration
                     (port-number 22)
@@ -216,6 +226,10 @@ ListenAddress [::]")))
                                 #~(job "00 04 *   *   1"  "rsnapshot -c /etc/rsnapshot.conf gamma")
                                 #~(job "00 03 1   *   *"  "rsnapshot -c /etc/rsnapshot.conf delta")
                                 #~(job "00 02 *   */6 *"  "rsnapshot -c /etc/rsnapshot.conf epsilon")))
+          ;; (service pulseaudio-service-type
+          ;;          (pulseaudio-configuration
+          ;;           (daemon-conf '((exit-idle-time . -1)
+          ;;                          (flat-volumes . no)))))
           (extra-special-file "/usr/bin/sh" (file-append bash "/bin/sh"))
           (extra-special-file "/bin/bash" (file-append bash "/bin/bash"))
           (extra-special-file "/usr/bin/bash" (file-append bash "/bin/bash"))
@@ -224,6 +238,7 @@ ListenAddress [::]")))
           (remove (lambda (service)
                     (or (eq? (service-kind service) gdm-service-type)
                         (eq? (service-kind service) sysctl-service-type)
+                        ;; (eq? (service-kind service) pulseaudio-service-type)
                         ))
                   %desktop-services)))
 
